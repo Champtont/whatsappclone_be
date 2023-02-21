@@ -9,7 +9,12 @@ const usersSchema = new Schema(
     userName: { type: String, required: false },
     email: { type: String, required: true },
     password: { type: String, required: true },
-    avatar: { type: String, required: false },
+    phone: { type: String, default: "+1 412 628 0133" },
+    avatar: {
+      type: String,
+      default: "https://img.freepik.com/free-icon/avatar_318-538240.jpg",
+    },
+    about: { type: String, default: "I am using a clone...I mean whatsApp!" },
     role: { type: String, enum: ["User", "Admin"], default: "User" },
   },
   {
@@ -38,8 +43,8 @@ usersSchema.methods.toJSON = function () {
   return user;
 };
 
-usersSchema.static("checkCredentials", async function (email, password) {
-  const user = await this.findOne({ email });
+usersSchema.static("checkCredentials", async function (userName, password) {
+  const user = await this.findOne({ userName });
   if (user) {
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (passwordMatch) {
