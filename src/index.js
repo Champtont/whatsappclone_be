@@ -1,13 +1,6 @@
 import listEndpoints from "express-list-endpoints";
 import mongoose from "mongoose";
-import server from "./server";
-
-declare const process: {
-  env: {
-    PORT: number;
-    MONGO_URL: string;
-  };
-};
+import server from "./server.js";
 
 const port = process.env.PORT;
 

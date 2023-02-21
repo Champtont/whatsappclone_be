@@ -1,0 +1,28 @@
+import createHttpError from "http-errors";
+import atob from "atob";
+import UsersModel from "../../api/users/model.js";
+
+export const basicAuthMiddleware = async (req, res, next) => {
+  if (!req.headers.authorization) {
+    next(
+      createHttpError(
+        401,
+        "Please provide credentials in the Authorization header!"
+      )
+    );
+  } else {
+    const encodedCredentials = req.headers.authorization.split(" ")[1];
+
+    const credentials = atob(encodedCredentials);
+
+    const [userName, password] = credentials.split(":");
+
+    const user = await UsersModel.checkCredentials(userName, password);
+    if (user) {
+      req.user = user;
+      next();
+    } else {
+      next(createHttpError(401, "Credentials not ok!"));
+    }
+  }
+};

@@ -5,8 +5,8 @@ import {
   unauthorizedHandler,
   genericErrorHandler,
   forbiddenHandler,
-} from "./errorHandlers";
-import usersRouter from "./api/users";
+} from "./errorHandlers.js";
+import usersRouter from "./api/users/index.js";
 
 const server = express();
 
