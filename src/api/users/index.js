@@ -14,7 +14,12 @@ usersRouter.post("/account", async (req, res, next) => {
   try {
     const newUser = new UsersModel(req.body);
     const { _id } = await newUser.save();
-    res.status(201).send({ _id });
+    if ({ _id }) {
+      const payload = { _id: newUser._id, role: newUser.role };
+
+      const accessToken = await createAccessToken(payload);
+      res.status(201).send({ accessToken });
+    }
   } catch (error) {
     next(error);
   }
