@@ -7,6 +7,7 @@ import {
   forbiddenHandler,
 } from "./errorHandlers.js";
 import usersRouter from "./api/users/index.js";
+import chatsRouter from "./api/chats/index.js";
 
 const server = express();
 
@@ -15,6 +16,7 @@ server.use(express.json());
 
 //endpoints
 server.use("/users", usersRouter);
+server.use("/chats", chatsRouter);
 
 server.use(badRequestHandler);
 server.use(unauthorizedHandler);
