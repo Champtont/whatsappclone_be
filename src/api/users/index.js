@@ -16,7 +16,6 @@ usersRouter.post("/account", async (req, res, next) => {
     const { _id } = await newUser.save();
     if ({ _id }) {
       const payload = { _id: newUser._id, role: newUser.role };
-
       const accessToken = await createAccessToken(payload);
       res.status(201).send({ accessToken });
     }
@@ -63,15 +62,25 @@ usersRouter.get("/:userId", JWTAuthMiddleware, async (req, res, next) => {
 usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const updatedUser = await UsersModel.findByIdAndUpdate(
-      req.user?._id,
+      req.user._id,
       req.body,
       { new: true, runValidators: true }
     );
     if (updatedUser) {
       res.send(updatedUser);
     } else {
-      next(createError(404, `User with id ${req.user?._id} not found!`));
+      next(createError(404, `User with id ${req.user._id} not found!`));
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+//user Logout
+usersRouter.delete("/session", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    await UsersModel.findByIdAndUpdate(req.user._id);
+    res.status(204).send();
   } catch (error) {
     next(error);
   }
