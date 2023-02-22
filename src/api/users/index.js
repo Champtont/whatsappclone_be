@@ -1,5 +1,6 @@
 import express from "express";
 import createError from "http-errors";
+import q2m from "query-to-mongo";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
@@ -19,11 +20,14 @@ usersRouter.post("/account", async (req, res, next) => {
   }
 });
 
-//get all users does not have a query
 usersRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const user = await UsersModel.find();
-    res.send(user);
+    const mongoQuery = q2m(req.query);
+    const users = await UsersModel.find(
+      mongoQuery.criteria,
+      mongoQuery.options.fields
+    );
+    res.send(users);
   } catch (error) {
     next(error);
   }
