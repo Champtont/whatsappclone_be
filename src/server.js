@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import { Server } from "socket.io";
+import { createServer } from "http";
+import { newConnectionHandler } from "./socket/index.js";
 import {
   badRequestHandler,
   unauthorizedHandler,
@@ -8,17 +11,22 @@ import {
 } from "./errorHandlers.js";
 import usersRouter from "./api/users/index.js";
 
-const server = express();
+const expressServer = express();
 
-server.use(cors());
-server.use(express.json());
+expressServer.use(cors());
+expressServer.use(express.json());
+
+//Socket.IO
+const httpServer = createServer(expressServer);
+const io = new Server(httpServer);
+io.on("connection", newConnectionHandler);
 
 //endpoints
-server.use("/users", usersRouter);
+expressServer.use("/users", usersRouter);
 
-server.use(badRequestHandler);
-server.use(unauthorizedHandler);
-server.use(forbiddenHandler);
-server.use(genericErrorHandler);
+expressServer.use(badRequestHandler);
+expressServer.use(unauthorizedHandler);
+expressServer.use(forbiddenHandler);
+expressServer.use(genericErrorHandler);
 
-export default server;
+export default expressServer;
