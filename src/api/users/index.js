@@ -136,19 +136,7 @@ usersRouter.post(
   }
 );
 
-usersRouter.get("/contacts", JWTAuthMiddleware, async (req, res, next) => {
-  try {
-    const contacts = await UsersModel.findById(req.user._id).select("contacts").populate("contacts")
-    if(contacts){
-      res.send(contacts)
-    }
-    else{
-      res.status(404).send("There are no contacts for this user")
-    }
-  } catch (err) {
-    next(err)
-  }
-})
+
 
 usersRouter.post("/contacts", JWTAuthMiddleware, async (req, res, next) => {
   try {
