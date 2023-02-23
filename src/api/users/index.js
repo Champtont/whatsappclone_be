@@ -153,4 +153,17 @@ usersRouter.post("/contacts", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+usersRouter.get("/contacts/me", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const user = await UsersModel.findById(req.user._id).select("contacts -_id").populate({
+      path: "contacts",
+      model: "Users",
+      select: "userName email"
+    })
+    res.send(user.contacts)
+  } catch (err) {
+    next(err)
+  }
+})
+
 export default usersRouter;
