@@ -18,7 +18,7 @@ expressServer.use(cors());
 expressServer.use(express.json());
 
 //Socket.IO
-const httpServer = createServer(expressServer);
+export const httpServer = createServer(expressServer);
 const io = new Server(httpServer);
 io.on("connection", newConnectionHandler);
 
