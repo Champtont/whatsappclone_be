@@ -1,5 +1,7 @@
 let onlineUsers = [];
 
+console.log(onlineUsers)
+
 export const newConnectionHandler = (newClient) => {
   console.log("NEW CONNECTION:", newClient.id);
   newClient.emit("welcome", { message: `Hey ${newClient.id}!` });
@@ -12,6 +14,11 @@ export const newConnectionHandler = (newClient) => {
 
     newClient.broadcast.emit("updateOnlineUsersList", onlineUsers);
   });
+
+  newClient.on("joinRoom", socket => {
+    socket.join("test")
+  })
+
 
   newClient.on("sendMessage", (message) => {
     console.log("NEW MESSAGE:", message);
