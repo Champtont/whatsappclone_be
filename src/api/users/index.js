@@ -136,4 +136,33 @@ usersRouter.post(
   }
 );
 
+usersRouter.get("/contacts", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const contacts = await UsersModel.findById(req.user._id).select("contacts").populate("contacts")
+    if(contacts){
+      res.send(contacts)
+    }
+    else{
+      res.status(404).send("There are no contacts for this user")
+    }
+  } catch (err) {
+    next(err)
+  }
+})
+
+usersRouter.post("/contacts", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const user = await UsersModel.findByIdAndUpdate(req.user._id, {
+      $push: { contacts: req.body.contacts },
+    });
+    if (user) {
+      res.status(201).send();
+    } else {
+      next(createError(404, `Cannot add contacts to this user`));
+    }
+  } catch (error) {
+    next(err);
+  }
+});
+
 export default usersRouter;
