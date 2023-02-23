@@ -1,11 +1,16 @@
 import express from "express";
 import createHttpError from "http-errors";
 import ChatsModel from "./model.js";
+import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 const chatsRouter = express.Router();
 
 //get chats
-chatsRouter.get("/", async (req, res, next) => {
+chatsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
+    const chatHistory = await ChatsModel.find({
+      members: { $in: [req.user_id] },
+    });
+    res.send(chatHistory);
   } catch (error) {
     next(error);
   }
@@ -14,6 +19,13 @@ chatsRouter.get("/", async (req, res, next) => {
 //get single chat
 chatsRouter.get("/:chatId", async (req, res, next) => {
   try {
+    const chat = await ChatsModel.findById(req.params.chatId)
+      .populate({
+        path: "message",
+        populate: { path: "sender", select: "userName avatar" },
+      })
+      .populate({ path: "members", select: "userName avatar" });
+    res.send(chat);
   } catch (error) {
     next(error);
   }
@@ -33,24 +45,7 @@ chatsRouter.delete("/:chatId", async (req, res, next) => {
   }
 });
 
-//post chat
-chatsRouter.post("/", async (req, res, next) => {
-  try {
-    const chat = await ChatsModel.findById(req.params.chatId);
-  } catch (error) {
-    next(error);
-  }
-});
-
 //MESSAGES
-
-//get messages
-chatsRouter.get("/:chatId/messages", async (req, res, next) => {
-  try {
-  } catch (error) {
-    next(error);
-  }
-});
 
 //delete single message
 chatsRouter.delete("/:chatId/messages/:messageId", async (req, res, next) => {
@@ -73,14 +68,6 @@ chatsRouter.delete("/:chatId/messages/:messageId", async (req, res, next) => {
 
 //put single message
 chatsRouter.put("/:chatId/messages/:messageId", async (req, res, next) => {
-  try {
-  } catch (error) {
-    next(error);
-  }
-});
-
-//post single message
-chatsRouter.post("/:chatId/messages", async (req, res, next) => {
   try {
   } catch (error) {
     next(error);
