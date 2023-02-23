@@ -12,7 +12,7 @@ import {
 import usersRouter from "./api/users/index.js";
 import chatsRouter from "./api/chats/index.js";
 
-const expressServer = express();
+export const expressServer = express();
 
 expressServer.use(cors());
 expressServer.use(express.json());
@@ -25,7 +25,7 @@ io.on("connection", newConnectionHandler);
 //endpoints
 
 //server.use("/users", usersRouter);
-server.use("/chats", chatsRouter);
+expressServer.use("/chats", chatsRouter);
 expressServer.use("/users", usersRouter);
 
 

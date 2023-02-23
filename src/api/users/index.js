@@ -26,10 +26,11 @@ usersRouter.post("/account", async (req, res, next) => {
 
 usersRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const mongoQuery = q2m(req.query);
+    // const mongoQuery = q2m(req.query);
     const users = await UsersModel.find(
-      mongoQuery.criteria,
-      mongoQuery.options.fields
+      // mongoQuery.criteria,
+      // mongoQuery.options.fields
+      {'userName': { $regex: '^' + req.query.userName, $options: 'i' }}
     );
     res.send(users);
   } catch (error) {
@@ -39,7 +40,10 @@ usersRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const user = await UsersModel.findById(req.user._id);
+    const user = await UsersModel.findById(req.user._id).populate({
+      path: "contacts",
+      select: "_id userName email"
+    })
     res.send(user);
   } catch (error) {
     next(error);
@@ -136,7 +140,20 @@ usersRouter.post(
   }
 );
 
-
+usersRouter.get("/contacts/me", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const user = await UsersModel.findById(req.user._id)
+      .select("contacts -_id")
+      .populate({
+        path: "contacts",
+        model: "Users",
+        select: "userName email",
+      });
+    res.send(user.contacts);
+  } catch (err) {
+    next(err);
+  }
+});
 
 usersRouter.post("/contacts", JWTAuthMiddleware, async (req, res, next) => {
   try {
@@ -149,21 +166,8 @@ usersRouter.post("/contacts", JWTAuthMiddleware, async (req, res, next) => {
       next(createError(404, `Cannot add contacts to this user`));
     }
   } catch (error) {
-    next(err);
+    next(error);
   }
 });
-
-usersRouter.get("/contacts/me", JWTAuthMiddleware, async (req, res, next) => {
-  try {
-    const user = await UsersModel.findById(req.user._id).select("contacts -_id").populate({
-      path: "contacts",
-      model: "Users",
-      select: "userName email"
-    })
-    res.send(user.contacts)
-  } catch (err) {
-    next(err)
-  }
-})
 
 export default usersRouter;
