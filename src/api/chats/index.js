@@ -21,7 +21,8 @@ chatsRouter.get("/:chatId", async (req, res, next) => {
   try {
     const chat = await ChatsModel.findById(req.params.chatId)
       .populate({
-        path: "message",
+        path: "messages",
+        schema: 'Message',
         populate: { path: "sender", select: "userName avatar" },
       })
       .populate({ path: "members", select: "userName avatar" });
