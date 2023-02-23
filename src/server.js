@@ -10,6 +10,8 @@ import {
   forbiddenHandler,
 } from "./errorHandlers.js";
 import usersRouter from "./api/users/index.js";
+import chatsRouter from "./api/chat/index.js";
+import messagesRouter from "./api/messages/index.js";
 
 const expressServer = express();
 
@@ -23,6 +25,8 @@ io.on("connection", newConnectionHandler);
 
 //endpoints
 expressServer.use("/users", usersRouter);
+expressServer.use("/chats", chatsRouter);
+expressServer.use("/messages", messagesRouter);
 
 expressServer.use(badRequestHandler);
 expressServer.use(unauthorizedHandler);
