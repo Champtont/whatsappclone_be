@@ -6,6 +6,7 @@ import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 
 const messagesRouter = express.Router();
 
+//post new message in the chat
 messagesRouter.post(
   "/:chatId/messages",
   JWTAuthMiddleware,
@@ -37,16 +38,13 @@ messagesRouter.post(
           next(
             createHttpError(
               404,
-              `Product with id ${req.params.chatId} not found!`
+              `Message with id ${req.params.chatId} not found!`
             )
           );
         }
       } else {
         next(
-          createHttpError(
-            404,
-            `Review with id ${req.body.messageId} not found!`
-          )
+          createHttpError(404, `Chat with id ${req.body.chatId} not found!`)
         );
       }
     } catch (error) {
@@ -55,6 +53,7 @@ messagesRouter.post(
   }
 );
 
+//Delete a message
 messagesRouter.delete("/:chatId/:messageId", async (req, res, next) => {
   try {
     const updatedChat = await ChatsModel.findByIdAndUpdate(
