@@ -58,10 +58,13 @@ messagesRouter.delete("/:chatId/:messageId", async (req, res, next) => {
   try {
     const updatedChat = await ChatsModel.findByIdAndUpdate(
       req.params.chatId,
-      { $pull: { messages: { _id: req.params.messageId } } },
+      { $pull: { messages: req.params.messageId } },
       { new: true, runValidators: true }
     );
-    if (updatedChat) {
+    const messageToDelete = await MessagesModel.findByIdAndDelete(
+      req.params.messageId
+    );
+    if (updatedChat && messageToDelete) {
       res.send(updatedChat);
     } else {
       next(
