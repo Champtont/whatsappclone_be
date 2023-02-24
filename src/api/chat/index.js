@@ -120,11 +120,12 @@ chatsRouter.get("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
     const chat = await ChatsModel.findById(req.params.chatId)
       .populate({
         path: "messages",
-        select: ["chat", "content"],
-      })
-      .populate({
-        path: "messages.sender",
-        model: User,
+        select: "chat content",
+        populate: {
+          path: "sender",
+          model: "User",
+          select: "userName phone avatar",
+        },
       })
       .populate({
         path: "members",
