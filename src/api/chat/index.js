@@ -79,34 +79,6 @@ chatsRouter.get("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
 });
 
 chatsRouter.delete("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
-  // try {
-  //   const chat = await ChatsModel.findById(req.params.chatId);
-  //   const index = chat.members.findIndex(
-  //     (m) => m._id.toString() === req.user._id
-  //   );
-
-  //   if (index !== -1) {
-  //     const updatedChat = await ChatsModel.findByIdAndUpdate(
-  //       req.params.chatId,
-  //       { $push: { deletedBy: req.user._id } },
-  //       { new: true }
-  //     )
-  //       .populate("history")
-  //       .populate("members")
-  //       .populate("deletedBy");
-
-  //     res.send(updatedChat);
-  //   } else {
-  //     next(
-  //       createHttpError(
-  //         401,
-  //         `Authorization failed for chat with ID ${req.params.chatId}!`
-  //       )
-  //     );
-  //   }
-  // } catch (error) {
-  //   next(error);
-  // }
   try {
     const updatedChat = await ChatsModel.findByIdAndDelete(req.params.chatId);
     if (updatedChat) {
