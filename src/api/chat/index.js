@@ -18,6 +18,7 @@ chatsRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+//get chats that you are involved in
 chatsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const chats = await ChatsModel.find({ members: req.user._id })
@@ -42,6 +43,7 @@ chatsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+//get specific chat and return all messages from said chat
 chatsRouter.get("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const chat = await ChatsModel.findById(req.params.chatId)
@@ -78,30 +80,15 @@ chatsRouter.get("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+//delete the chat
 chatsRouter.delete("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const chat = await ChatsModel.findById(req.params.chatId);
-    const index = chat.members.findIndex(
-      (m) => m._id.toString() === req.user._id
-    );
-
-    if (index !== -1) {
-      const updatedChat = await ChatsModel.findByIdAndUpdate(
-        req.params.chatId,
-        { $push: { deletedBy: req.user._id } },
-        { new: true }
-      )
-        .populate("history")
-        .populate("members")
-        .populate("deletedBy");
-
+    const updatedChat = await ChatsModel.findByIdAndDelete(req.params.chatId);
+    if (updatedChat) {
       res.send(updatedChat);
     } else {
       next(
-        createHttpError(
-          401,
-          `Authorization failed for chat with ID ${req.params.chatId}!`
-        )
+        createHttpError(404, `Product with id ${req.params.chatId} not found!`)
       );
     }
   } catch (error) {
