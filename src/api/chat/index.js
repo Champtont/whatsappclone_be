@@ -79,33 +79,45 @@ chatsRouter.get("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
 });
 
 chatsRouter.delete("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
+  // try {
+  //   const chat = await ChatsModel.findById(req.params.chatId);
+  //   const index = chat.members.findIndex(
+  //     (m) => m._id.toString() === req.user._id
+  //   );
+
+  //   if (index !== -1) {
+  //     const updatedChat = await ChatsModel.findByIdAndUpdate(
+  //       req.params.chatId,
+  //       { $push: { deletedBy: req.user._id } },
+  //       { new: true }
+  //     )
+  //       .populate("history")
+  //       .populate("members")
+  //       .populate("deletedBy");
+
+  //     res.send(updatedChat);
+  //   } else {
+  //     next(
+  //       createHttpError(
+  //         401,
+  //         `Authorization failed for chat with ID ${req.params.chatId}!`
+  //       )
+  //     );
+  //   }
+  // } catch (error) {
+  //   next(error);
+  // }
   try {
-    const chat = await ChatsModel.findById(req.params.chatId);
-    const index = chat.members.findIndex(
-      (m) => m._id.toString() === req.user._id
-    );
-
-    if (index !== -1) {
-      const updatedChat = await ChatsModel.findByIdAndUpdate(
-        req.params.chatId,
-        { $push: { deletedBy: req.user._id } },
-        { new: true }
-      )
-        .populate("history", { strictPopulate: false })
-        .populate("members")
-        .populate("deletedBy");
-
+    const updatedChat = await ChatsModel.findByIdAndDelete(req.params.chatId);
+    if (updatedChat) {
       res.send(updatedChat);
     } else {
       next(
-        createHttpError(
-          401,
-          `Authorization failed for chat with ID ${req.params.chatId}!`
-        )
+        createHttpError(404, `Cannot delete chat with id ${req.params.chatId}`)
       );
     }
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
 
