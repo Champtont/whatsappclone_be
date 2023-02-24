@@ -18,13 +18,6 @@ messagesRouter.post(
       });
       console.log(req.body);
       const { _id } = await newMessage.save();
-      if ({ _id }) {
-        {
-          $push: {
-            chat: req.params.chatId;
-          }
-        }
-      }
       if (newMessage) {
         const messageToInsert = {
           ...newMessage,

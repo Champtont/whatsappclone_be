@@ -5,10 +5,14 @@ const { Schema, model } = mongoose;
 const chatSchema = new Schema(
   {
     members: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
-    messages: [{ type: Schema.Types.ObjectId, ref: "Message", required: true }],
-    name: { type: String },
+    messages: [
+      { type: Schema.Types.ObjectId, ref: "Message", required: false },
+    ],
+    name: { type: String, required: true },
     avatar: {
       type: String,
+      requiured: false,
+      default: "https://picsum.photos/200",
     },
   },
   { timestamps: true }

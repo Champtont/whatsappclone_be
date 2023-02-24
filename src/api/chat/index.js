@@ -2,7 +2,6 @@ import express from "express";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 import ChatsModel from "./model.js";
 import MessagesModel from "../messages/model.js";
-import UsersModel from "../users/model.js";
 import createHttpError from "http-errors";
 
 const chatsRouter = express.Router();
@@ -10,82 +9,10 @@ const chatsRouter = express.Router();
 //post new chat
 chatsRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    if (req.body.type === "private") {
-      const recipient = req.body.members[0];
-      req.body.members = [...req.body.members, req.user._id];
-      const [checkDublicate] = await ChatsModel.find({
-        members: req.body.members,
-      });
-      if (checkDublicate) {
-        next(
-          createHttpError(
-            403,
-            `This chat already exists with ID ${checkDublicate._id.toString()}!`
-          )
-        );
-      } else {
-        req.body.members = [req.user._id, recipient];
-        const [checkDublicateReverse] = await ChatsModel.find({
-          members: req.body.members,
-        });
-        if (checkDublicateReverse) {
-          next(
-            createHttpError(
-              403,
-              `This chat already exists with ID ${checkDublicateReverse._id.toString()}!`
-            )
-          );
-        } else {
-          const message = {
-            sender: req.user._id,
-            text: req.body.firstMessage,
-            deleted: false,
-          };
-          const newMessage = new MessagesModel(message);
-          const { _id } = await newMessage.save();
+    const newChat = new ChatsModel(req.body);
+    const { id } = await newChat.save();
 
-          req.body.members = [...req.body.members];
-          req.body.history = [_id];
-          req.body.deletedBy = [];
-
-          const chat = {
-            type: "private",
-            members: req.body.members,
-            history: req.body.history,
-            deletedBy: req.body.deletedBy,
-            firstMessage: req.body.firstMessage,
-            room: req.body.room,
-          };
-          const newChat = new ChatsModel(chat);
-          const { id } = await newChat.save();
-          res.send({ id });
-        }
-      }
-    } else {
-      const message = {
-        sender: req.user._id,
-        text: req.body.firstMessage,
-        deleted: false,
-      };
-
-      const newMessage = new MessagesModel(message);
-
-      const { _id } = await newMessage.save();
-
-      req.body.members = [...req.body.members, req.user._id];
-      req.body.history = [_id];
-      req.body.deletedBy = [];
-
-      const chat = {
-        ...req.body,
-      };
-
-      const newChat = new ChatsModel(chat);
-
-      const { id } = await newChat.save();
-
-      res.send({ id });
-    }
+    res.send({ id });
   } catch (error) {
     next(error);
   }
@@ -93,7 +20,7 @@ chatsRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
 
 chatsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const chats = await ChatsModel.find()
+    const chats = await ChatsModel.find({ members: req.user._id })
       .populate({
         path: "members",
         select: ["userName", "phone", "avatar"],
@@ -157,7 +84,6 @@ chatsRouter.delete("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
     const index = chat.members.findIndex(
       (m) => m._id.toString() === req.user._id
     );
-    console.log("🚀 ~ file: index.js:131 ~ chatsRouter.get ~ index:", index);
 
     if (index !== -1) {
       const updatedChat = await ChatsModel.findByIdAndUpdate(
