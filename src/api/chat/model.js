@@ -14,7 +14,7 @@ const chatSchema = new Schema(
       requiured: false,
       default: "https://picsum.photos/200",
     },
-    room: {type: String}
+    room: { type: String },
   },
   { timestamps: true }
 );
