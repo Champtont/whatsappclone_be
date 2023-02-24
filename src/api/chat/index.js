@@ -2,6 +2,7 @@ import express from "express";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 import ChatsModel from "./model.js";
 import MessagesModel from "../messages/model.js";
+import UsersModel from "../users/model.js";
 import createHttpError from "http-errors";
 
 const chatsRouter = express.Router();
@@ -117,7 +118,14 @@ chatsRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
 chatsRouter.get("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const chat = await ChatsModel.findById(req.params.chatId)
-      .populate({ path: "messages" })
+      .populate({
+        path: "messages",
+        select: ["chat", "content"],
+      })
+      .populate({
+        path: "messages.sender",
+        model: User,
+      })
       .populate({
         path: "members",
         select: ["userName", "phone", "avatar"],

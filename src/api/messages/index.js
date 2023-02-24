@@ -2,45 +2,65 @@ import express from "express";
 import MessagesModel from "./model.js";
 import ChatsModel from "../chat/model.js";
 import createHttpError from "http-errors";
+import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
 
 const messagesRouter = express.Router();
 
-messagesRouter.post("/:chatId/messages", async (req, res, next) => {
-  try {
-    const newMessage = new MessagesModel(req.body);
-    console.log(req.body);
-    if (newMessage) {
-      const messageToInsert = {
-        ...newMessage,
-        content: req.body.content,
+messagesRouter.post(
+  "/:chatId/messages",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const newMessage = new MessagesModel({
         chat: req.params.chatId,
-      };
-      console.log(messageToInsert);
-      const updatedChat = await ChatsModel.findByIdAndUpdate(
-        req.params.chatId,
-        { $push: { messages: messageToInsert } },
-        { new: true, runValidators: true }
-      );
-      if (updatedChat) {
-        res.send(updatedChat);
-        console.log(updatedChat);
+        sender: req.user._id,
+        content: req.body.content,
+      });
+      console.log(req.body);
+      const { _id } = await newMessage.save();
+      if ({ _id }) {
+        {
+          $push: {
+            chat: req.params.chatId;
+          }
+        }
+      }
+      if (newMessage) {
+        const messageToInsert = {
+          ...newMessage,
+          content: req.body,
+          chat: req.params.chatId,
+        };
+        console.log(messageToInsert);
+        const updatedChat = await ChatsModel.findByIdAndUpdate(
+          req.params.chatId,
+          { $push: { messages: messageToInsert } },
+          { new: true, runValidators: true }
+        );
+        if (updatedChat) {
+          res.send(updatedChat);
+          console.log(updatedChat);
+        } else {
+          next(
+            createHttpError(
+              404,
+              `Product with id ${req.params.chatId} not found!`
+            )
+          );
+        }
       } else {
         next(
           createHttpError(
             404,
-            `Product with id ${req.params.chatId} not found!`
+            `Review with id ${req.body.messageId} not found!`
           )
         );
       }
-    } else {
-      next(
-        createHttpError(404, `Review with id ${req.body.messageId} not found!`)
-      );
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 messagesRouter.delete("/:chatId/:messageId", async (req, res, next) => {
   try {
