@@ -10,19 +10,26 @@ import {
   forbiddenHandler,
 } from "./errorHandlers.js";
 import usersRouter from "./api/users/index.js";
+import chatsRouter from "./api/chat/index.js";
+import messagesRouter from "./api/messages/index.js";
 
-const expressServer = express();
+export const expressServer = express();
 
 expressServer.use(cors());
 expressServer.use(express.json());
 
 //Socket.IO
-const httpServer = createServer(expressServer);
+export const httpServer = createServer(expressServer);
 const io = new Server(httpServer);
 io.on("connection", newConnectionHandler);
 
 //endpoints
+
+//server.use("/users", usersRouter);
+expressServer.use("/chats", chatsRouter);
 expressServer.use("/users", usersRouter);
+expressServer.use("/chats", chatsRouter);
+expressServer.use("/messages", messagesRouter);
 
 expressServer.use(badRequestHandler);
 expressServer.use(unauthorizedHandler);

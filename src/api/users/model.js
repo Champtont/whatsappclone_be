@@ -15,6 +15,7 @@ const usersSchema = new Schema(
     },
     about: { type: String, default: "I am using a clone...I mean whatsApp!" },
     role: { type: String, enum: ["User", "Admin"], default: "User" },
+    contacts: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true,
@@ -56,4 +57,4 @@ usersSchema.static("checkCredentials", async function (userName, password) {
   }
 });
 
-export default model("Users", usersSchema);
+export default model("User", usersSchema);
