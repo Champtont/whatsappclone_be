@@ -15,14 +15,15 @@ export const newConnectionHandler = (newClient) => {
     newClient.broadcast.emit("updateOnlineUsersList", onlineUsers);
   });
 
-  newClient.on("joinChat", ({userName, room}) => {
-    socket.emit("welcome!")
-
+  newClient.on('joinRoom', (payload) => {
+    newClient.join(payload.room)
+    newClient.emit("joinedRoom", `You have joined the room: ${payload.room}`)
+    console.log("Joined room event", payload.room)
   })
 
-  newClient.on("sendMsg", (message) => {
+  newClient.on("sendMsg", (message, room) => {
     const user = getUser(newClient.id)
-    io.to(user.room).emit('message', {user: user.username, text: message})
+    io.to(room).emit('message', {user: user.username, text: message})
   })
 
 

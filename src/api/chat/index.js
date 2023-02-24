@@ -47,7 +47,7 @@ chatsRouter.get("/:chatId", JWTAuthMiddleware, async (req, res, next) => {
     const chat = await ChatsModel.findById(req.params.chatId)
       .populate({
         path: "messages",
-        select: "chat content",
+        select: "chat content createdAt",
         populate: {
           path: "sender",
           model: "User",
